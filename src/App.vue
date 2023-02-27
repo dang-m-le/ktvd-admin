@@ -11,7 +11,7 @@ import { postURL, bracket } from '@/utils.js'
 <script>
 export default {
     components: { LoginDlg, ConfirmDlg },
-    expose: ['confirm', 'notify', 'post', 'accessible', 'resetPassword'],
+    expose: ['confirm', 'notify', 'post', 'accessible', 'resetPassword', 'moved'],
     data() {
         return {
             showing: {
@@ -48,6 +48,12 @@ export default {
                 return tokens[0].substring(0,2).toUpperCase()
             }
         }
+    },
+
+    created() {
+        this.$router.afterEach((to, from) => {
+            this.moved();
+        })
     },
 
     mounted() {
@@ -150,6 +156,15 @@ export default {
 
         async changeMyPassword() {
             await this.resetPassword(this.credential.username, !this.accessible('admin'));
+        },
+
+        moved(to, from) {
+            this.showing.drawer = false;
+            var menu = this.$refs.appmenu.$el;
+            //maybe don't clear out menu if moving into a nexted route???
+            while (menu.firstChild) {
+                menu.removeChild(menu.firstChild);
+            }
         }
     }
 
@@ -159,8 +174,8 @@ export default {
 <template>
     <v-app>
         <v-app-bar density="compact">
-        <v-app-bar-nav-icon size="small" @click="showing.drawer=!showing.drawer"></v-app-bar-nav-icon>
-        <v-container id="appmenu" style="display:flex; flex-wrap:nowrap;"></v-container>
+        <v-app-bar-nav-icon @click="showing.drawer=!showing.drawer"></v-app-bar-nav-icon>
+        <v-container ref="appmenu" id="appmenu" style="display:flex; flex-wrap:nowrap;"></v-container>
         <v-spacer></v-spacer>
         <v-menu offset-y>
             <template v-slot:activator="{ props }">
@@ -184,6 +199,7 @@ export default {
             <v-list class="main-menu" density="compact" nav>
                 <router-link to="/settings"><v-list-item prepend-icon="mdi-school" title="Settings"></v-list-item></router-link>
                 <router-link to="/users"><v-list-item prepend-icon="mdi-account-multiple" title="Users"></v-list-item></router-link>
+                <a href="registration-letter.php" target="__blank"><v-list-item prepend-icon="mdi-email-mark-as-unread" title="Re-registration" subtitle="Reminder Letter"></v-list-item></a>
             </v-list>
         </v-navigation-drawer>
 

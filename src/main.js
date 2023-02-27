@@ -17,12 +17,13 @@ const vuetify = createVuetify({
     directives,
 })
 
+
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
         { path: '/', name: 'Home', component: HomePage },
-        { path: '/settings', name: 'Settings', component: Settings, props: { appmenu:'appmenu' }, beforeRouteLeave: ()=>{console.log("exit")} },
-        { path: '/users', name: 'Users', component: Users, props: { appmenu:'appmenu' } },
+        { path: '/settings', name: 'Settings', component: Settings, props: { appmenu:'appmenu' }},
+        { path: '/users', name: 'Users', component: Users, props: { appmenu:'appmenu' }},
     ]
 })
 

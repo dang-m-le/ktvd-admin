@@ -4,7 +4,6 @@
 <script>
 export default {
     props: ['appmenu'],
-    expose: ['unloadMenu'],
     data() {
         return {
             settings: {
@@ -26,7 +25,6 @@ export default {
     },
 
     beforeRouteLeave(to, from) {
-        this.unloadMenu();
         return true;
     },
 
@@ -73,8 +71,9 @@ export default {
 
 <template>
     <template>
-        <v-container ref="cmenu">
-            <v-btn variant="text" @click="saveSettings" color="blue" prepend-icon="mdi-check-circle">Save</v-btn>
+        <v-container  ref="cmenu" class="settings-menu">
+            <v-btn variant="text" @click="saveSettings" color="blue" 
+                ><v-icon size="x-large">mdi-check-circle</v-icon>Save</v-btn>
         </v-container>
     </template>
     <v-card class="settings" flat width="400">

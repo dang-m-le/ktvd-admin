@@ -16,10 +16,10 @@ export default defineConfig({
     
     server: {
         proxy: {
-            '^.*\.php$': { // must begins with the caret(^) to capture the entire path
-                target: 'http://localhost:8080',
+            '^.*\.php': { // must begins with the caret(^) to capture the entire path
+                target: 'http://localhost:8088',
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^/, '/admin')
+                no_rewrite: (path) => path.replace(/^/, '/admin')
             }
         }
     }

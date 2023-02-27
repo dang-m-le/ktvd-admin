@@ -7,9 +7,9 @@ $req = json_decode(file_get_contents("php://input"), true);
 $op = $req['op'];
 $cred = get_credential(true);
 
-if (!$cred) {
-    js_exit(array('status'=>'unauthorized', 'require_privilege'=>'basic',
-                  'message'=>"Please sign-in."));
+if (!$cred || !accessible($cred, 'admin')) {
+    js_exit(array('status'=>'unauthorized', 'require_privilege'=>'admin',
+                  'message'=>"Please sign-in with \u{00ab}admin\u{00bb} privilege."));
 }
 
 if ($op == "list") {

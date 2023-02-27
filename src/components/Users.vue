@@ -20,7 +20,7 @@ function nobody() {
 
 export default {
     props:['appmenu'],
-    expose: ['edited','selectUser','loadMenu','unloadMenu'],
+    expose: ['edited','selectUser'],
     data() {
         return {
             filter: "",
@@ -42,7 +42,6 @@ export default {
     
     async beforeRouteLeave(to, from, next) {
         if (await this.selectUser(nobody())) {
-            this.unloadMenu();
             next();
         }
         else {
@@ -67,7 +66,6 @@ export default {
 
         closeOut(nextRoute) {
             if (nextRoute) {
-                this.unloadMenu();
                 nextRoute();
             }
         },
@@ -196,17 +194,17 @@ export default {
 <template>
     <template>
         <v-container ref="cmenu" class="users-menu">
-            <v-btn variant="text" prepend-icon="mdi-account-plus" @click="newUser" color="green"
-                ><span class="d-none d-sm-flex">New</span></v-btn>
-            <v-btn variant="text" prepend-icon="mdi-account-check" @click="saveUser" color="blue"
+            <v-btn variant="text" @click="newUser" color="green"
+                ><v-icon size="x-large">mdi-account-plus</v-icon><span class="d-none d-sm-flex">New</span></v-btn>
+            <v-btn variant="text" @click="saveUser" color="blue"
                 :disabled="!edit.username"
-                ><span class="d-none d-sm-flex">Save</span></v-btn>
-            <v-btn variant="text" prepend-icon="mdi-account-remove" @click="removeUser" color="orange"
+                ><v-icon size="x-large">mdi-account-check</v-icon><span class="d-none d-sm-flex">Save</span></v-btn>
+            <v-btn variant="text" @click="removeUser" color="orange"
                 :disabled="!orig.username"
-                ><span class="d-none d-sm-flex">Remove</span></v-btn>
-            <v-btn variant="text" prepend-icon="mdi-lock-reset" @click="resetPassword" color="purple"
+                ><v-icon size="x-large">mdi-account-remove</v-icon><span class="d-none d-sm-flex">Remove</span></v-btn>
+            <v-btn variant="text" @click="resetPassword" color="purple"
                 :disabled="!orig.username"
-                ><span class="d-none d-sm-flex">Password</span></v-btn>
+                ><v-icon size="x-large">mdi-lock-reset</v-icon><span class="d-none d-sm-flex">Password</span></v-btn>
         </v-container>
     </template>
     <v-container ref="editor" style="display:flex; flex-flow: wrap; align-contents:flex-start;">
