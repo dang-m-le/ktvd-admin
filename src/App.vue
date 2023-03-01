@@ -1,17 +1,25 @@
 <script setup>
-/* import HelloWorld from './components/HelloWorld.vue' */
+import { provide } from 'vue'
 import LoginDlg from '@/components/LoginDlg.vue'
 import ConfirmDlg from '@/components/ConfirmDlg.vue'
 import PasswordDlg from '@/components/PasswordDlg.vue'
-import { defineComponent, createApp } from "vue"
-import 'vue-router'
 import { postURL, bracket } from '@/utils.js'
+import 'vue-router'
  </script>
 
 <script>
 export default {
     components: { LoginDlg, ConfirmDlg },
     expose: ['confirm', 'notify', 'post', 'accessible', 'resetPassword', 'moved'],
+    provide: function() {
+        return { 
+            loadMenu: this.loadMenu,
+            post: this.post,
+            notify: this.notify,
+            confirm: this.confirm,
+            accessible: this.accessible
+        };
+    },
     data() {
         return {
             showing: {
@@ -61,28 +69,33 @@ export default {
     },
 
     methods: {
+        raise(msg) {
+            throw {status:'error', message: msg};
+        },
+
         async post(url, args, tries) {
             if (tries === undefined) {
                 tries = 5;
             }
 
-            var first_err = null;
+            var first_ex = null;
             while (tries > 0) {
                 --tries;
                 try {
                     return await postURL(url, args);
                 }
                 catch (ex) {
-                    if (!first_err) {
-                        first_err = ex;
+                    if (!first_ex) {
+                        first_ex = ex;
                     }
+
                     if (ex.status != 'unauthorized' || !await this.signIn(ex.message)) {
-                        throw first_err;
+                        break;
                     }
                     // else: login succeded, try re-posting
                 }
             }
-            throw first_err;
+            throw first_ex;
         },
 
         userLoggedIn(login) {
@@ -158,15 +171,26 @@ export default {
             await this.resetPassword(this.credential.username, !this.accessible('admin'));
         },
 
+        clearMenu() {
+            var menubar = this.$refs.appmenu.$el;
+            while (menubar.firstChild) {
+                menubar.removeChild(menubar.firstChild);
+            }
+        },
+
+        loadMenu(menu) {
+            //maybe don't clear out menu if moving into a nexted route???
+            this.clearMenu();
+            var menubar = this.$refs.appmenu.$el;
+            menubar.appendChild(menu);
+        },
+
         moved(to, from) {
             this.showing.drawer = false;
-            var menu = this.$refs.appmenu.$el;
-            //maybe don't clear out menu if moving into a nexted route???
-            while (menu.firstChild) {
-                menu.removeChild(menu.firstChild);
-            }
+            this.clearMenu();
         }
-    }
+    },
+
 
 }
 </script>
@@ -197,9 +221,10 @@ export default {
 
         <v-navigation-drawer :permanent="showing.drawer" rail expand-on-hover>
             <v-list class="main-menu" density="compact" nav>
-                <router-link to="/settings"><v-list-item prepend-icon="mdi-school" title="Settings"></v-list-item></router-link>
-                <router-link to="/users"><v-list-item prepend-icon="mdi-account-multiple" title="Users"></v-list-item></router-link>
-                <a href="registration-letter.php" target="__blank"><v-list-item prepend-icon="mdi-email-mark-as-unread" title="Re-registration" subtitle="Reminder Letter"></v-list-item></a>
+                <router-link to="/settings"><v-list-item prepend-icon="mdi-chair-school" title="Registration Settings"></v-list-item></router-link>
+                <router-link to="/users"><v-list-item prepend-icon="mdi-account-cog" title="User Accounts"></v-list-item></router-link>
+                <router-link to="/student"><v-list-item prepend-icon="mdi-account-school" title="Student Accounts"></v-list-item></router-link>
+                <a href="registration-letter.php?logo=yes&period=gl" target="_blank"><v-list-item prepend-icon="mdi-email-mark-as-unread" title="Re-registration" subtitle="Reminder Letter"></v-list-item></a>
             </v-list>
         </v-navigation-drawer>
 

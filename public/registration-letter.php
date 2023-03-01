@@ -34,6 +34,10 @@ BODY {
     display: inline-block;
 }
 
+.spacefiller {
+    display: inline-block;
+}
+
 .headings .giaoxu-name {
     text-align: center;
     font-family: Arial,sans-serif;
@@ -271,8 +275,7 @@ TD {
 require_once("config.php");
 require_once("utils.php");
 
-$details = @alt($_POST['details'], $_GET['details']);
-$nologo = @alt(intval($_POST['nologo']), intval($_GET['nologo']));
+$logo = strtolower(@alt($_POST['nologo'], $_GET['logo'], 'yes'));
 $period = strtolower(@alt($_POST['period'], $_GET['period'], 'gl'));
 
 $dbc = school_db();
@@ -316,7 +319,7 @@ function tuition($bd)
 
 //
 $fids = array();
-$stm = $dbc->prepare("select fid,vn,gl,tn from student left join schedule on student.id = schedule.id where signup = 'Y' order by birthdate desc");
+$stm = $dbc->prepare("select fid,vn,gl,tn from student join schedule on student.id = schedule.id order by birthdate desc");
 $stm->execute();
 while ($row = lowkey($stm->fetch(PDO::FETCH_ASSOC))) {
     $fids[$row['fid']] = $row[$period]; // save only the classname of the oldest student in each family
@@ -352,8 +355,11 @@ foreach ($fids as $fid=>$cls) {
     $stm = $dbc->prepare("select * from family where fid = ?");
     echo "<div id='receipt'>";
     echo "<div class='letterhead'>";
-    if (!$nologo) {
-        echo "<img src='images/KTVD-official-logo.png' width='76' height='76'>";
+    if ($logo == 'yes') {
+        echo "<img class='ktvd-logo' src='images/KTVD-official-logo.png' width='76' height='76'></img>";
+    }
+    else {
+        echo "<div class='spacefiller'></div>";
     }
     echo "<div class='headings'>";
     echo "<div class='giaoxu-name'>Giáo Xứ Nữ Vương Các Thánh Tử Đạo Việt Nam</div>";
@@ -361,8 +367,11 @@ foreach ($fids as $fid=>$cls) {
     echo "<div class='school-name'>Đoàn TNTT Kitô Vua &ndash; Trường GL/VN Đaminh Savio</div>";
     echo "<div class='address'>4655 Harlan St. &#x25aa; Wheat Ridge, CO 80033 &#x25aa; 303-431-0382</div>";
     echo "</div>";
-    if (!$nologo) {
-        echo "<img src='images/DaminhSavioLogo.png' width='80' height='80'>";
+    if ($logo == 'yes') {
+        echo "<img class='domsavio-logo' src='images/DaminhSavioLogo.png' width='80' height='80'></img>";
+    }
+    else {
+        echo "<div class='spacefiller'></div>";
     }
     echo "</div>";
     echo "<div class='period'>".strtoupper($period).":".classroom($cls)."</div>";
@@ -411,7 +420,7 @@ foreach ($fids as $fid=>$cls) {
     echo "<th>Học Phí /<br>Fee</th>";
     echo "<th>ID</th><th>Tên /<br>Name</th>";
     echo "<th>Sinh Nhật /<br>Birthdate</th>";
-    //echo "<th>GL</th>";
+    echo "<th>".strtoupper($period)."</th>";
     echo "<th>Rửa Tội /<br>Baptism</th>";
     echo "<th>Xưng Tội /<br>Confession</th>";
     echo "<th>Rước Lễ /<br>Eucharist</th>";
@@ -437,7 +446,7 @@ foreach ($fids as $fid=>$cls) {
         echo "<td class='id'>$student[id]</td>";
         echo "<td class='name'>".student_fullname($student)."</td>";
         echo "<td class='date'>".desc_date($student['birthdate'])."</td>";
-        // echo "<td class='gl'>".classroom($student[$period])."</td>";
+        echo "<td class='gl'>".classroom($student[$period])."</td>";
         echo "<td class='indicator'>".yes_no($student['baptized'])."</td>";
         echo "<td class='indicator'>".yes_no($student['confession'])."</td>";
         echo "<td class='indicator'>".yes_no($student['communion'])."</td>";

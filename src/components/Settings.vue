@@ -3,7 +3,8 @@
 
 <script>
 export default {
-    props: ['appmenu'],
+    props: [],
+    inject: ['loadMenu','notify','post','confirm'],
     data() {
         return {
             settings: {
@@ -20,8 +21,8 @@ export default {
     },
 
     mounted() {
-        this.loadMenu();
         this.loadSettings();
+        this.loadMenu(this.$refs.cmenu.$el);
     },
 
     beforeRouteLeave(to, from) {
@@ -29,40 +30,26 @@ export default {
     },
 
     methods: {
-        loadMenu() {
-            var menubar = document.getElementById(this.appmenu);
-            if (menubar) {
-                menubar.appendChild(this.$refs.cmenu.$el)
-            }
-        },
-
-        unloadMenu() {
-            var menubar = document.getElementById(this.appmenu);
-            if (menubar) {
-                menubar.removeChild(this.$refs.cmenu.$el)
-            }
-        },
-
         async loadSettings() {
             try {
-                var resp = await this.$root.post("settings.php", {op: 'get'});
+                var resp = await this.post("settings.php", {op: 'get'});
                 for (var attr in resp.settings) {
                     this.settings[attr] = resp.settings[attr];
                 }
             }
             catch(ex) {
-                this.$root.notify(resp.message, 'error');
+                this.notify(resp.message, 'error');
             }
         },
 
         async saveSettings() {
             try {
-                var resp = await this.$root.post('settings.php', {op: 'save', settings: this.settings});
+                var resp = await this.post('settings.php', {op: 'save', settings: this.settings});
                 console.log(resp);
-                this.$root.notify(resp.message, 'success');
+                this.notify(resp.message, 'success');
             }
             catch (ex) {
-                this.$root.notify(ex.message, 'error');
+                this.notify(ex.message, 'error');
             }
         }
     }

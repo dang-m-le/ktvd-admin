@@ -142,7 +142,10 @@ function get_credential($do_update) {
 
 function accessible($credential, $access)
 {
-    return in_array($access, explode(',', $credential['access']));
+    if (!$credential || !isset($credential['access'])) {
+        return false;
+    }
+    return in_array($access, explode(',', @$credential['access']));
 }
 
 ?>

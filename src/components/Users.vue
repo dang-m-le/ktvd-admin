@@ -1,5 +1,5 @@
 <script setup>
-import { FilterSet, alike, bracket } from '@/utils.js'
+import { FilterSet, alike, bracket, vn2us } from '@/utils.js'
 </script>
 
 <script>
@@ -19,8 +19,9 @@ function nobody() {
 }
 
 export default {
-    props:['appmenu'],
+    props:[],
     expose: ['edited','selectUser'],
+    inject: ['post','loadMenu','notify','confirm'],
     data() {
         return {
             filter: "",
@@ -37,7 +38,7 @@ export default {
 
     mounted() {
         this.listUsers();
-        this.loadMenu();
+        this.loadMenu(this.$refs.cmenu.$el);
     },
     
     async beforeRouteLeave(to, from, next) {
@@ -50,20 +51,6 @@ export default {
     },
 
     methods: {
-        loadMenu() {
-            var menubar = document.getElementById(this.appmenu);
-            if (menubar) {
-                menubar.appendChild(this.$refs.cmenu.$el)
-            }
-        },
-
-        unloadMenu() {
-            var menubar = document.getElementById(this.appmenu);
-            if (menubar) {
-                menubar.removeChild(this.$refs.cmenu.$el)
-            }
-        },
-
         closeOut(nextRoute) {
             if (nextRoute) {
                 nextRoute();
@@ -78,21 +65,22 @@ export default {
 
         async listUsers() {
             try {
-                var resp = await this.$root.post('users.php', {op: 'list'});
+                var resp = await this.post('users.php', {op: 'list'});
                 Object.assign(this.orig, this.edit);
 			    this.listing.splice(0);
                 resp.users.forEach(user => {
+                    user.cname = vn2us(user.fullname);
                     this.listing.push(user);
                 });
             }
             catch(ex) {
-                this.$root.notify(ex.message, 'error');
+                this.notify(ex.message, 'error');
             }
         },
 
         filterUsers() {
             var v = [];
-		    var filter = new FilterSet(this.filter || '.', ['username','fullname']);
+		    var filter = new FilterSet(this.filter || '.', ['cname']);
             this.listing.forEach(user => {
                 if (filter.match(user)) {
                     v.push(user);
@@ -111,7 +99,7 @@ export default {
                 return true;
             }
             
-            var ans = await this.$root.confirm('Save Account', "Save updated user's information?");
+            var ans = await this.confirm('Save Account', "Save updated user's information?");
             if (ans == 'cancel') {
                 return false;
             }
@@ -134,12 +122,12 @@ export default {
 
         async saveUser() {
             if (!this.edit.username || !this.edit.fullname) {
-                this.$root.notify("Empty user ID/fullname");
+                this.notify("Empty user ID/fullname");
                 return false;
             }
 
             try {
-		        var resp = await this.$root.post("users.php", { op: 'save', user: this.edit, orig: this.orig });
+		        var resp = await this.post("users.php", { op: 'save', user: this.edit, orig: this.orig });
                 var uid = this.orig.username;
                 var entry = this.listing.find(u => u.username == uid);
                 if (entry) {
@@ -149,28 +137,28 @@ export default {
                     this.listing.unshift(Object.assign({}, this.edit));
                 }
                 Object.assign(this.orig, this.edit);
-                this.$root.notify(resp.message);
+                this.notify(resp.message);
                 return true;
             }
             catch (ex) {
                 console.log(ex);
-                this.$root.notify(ex.message, 'error');
+                this.notify(ex.message, 'error');
                 return false;
             }
         },
 
         async removeUser() {
-            var ans = await this.$root.confirm("Remove Account", 
+            var ans = await this.confirm("Remove Account", 
                 "Remove Account "+bracket(this.orig.username)+"?", "OC");
             if (ans != 'yes') {
                 return;
             }
             try {
                 var uid = this.orig.username;
-                var resp = await this.$root.post('users.php', {
+                var resp = await this.post('users.php', {
                     op: 'remove', username: this.orig.username, fullname: this.orig.fullname
                 });
-                this.$root.notify(resp.message, 'success');
+                this.notify(resp.message, 'success');
                 var ndx = this.listing.findIndex(u => u.username == uid);
                 if (ndx != -1) {
                     this.listing.splice(ndx , 1);
@@ -178,12 +166,12 @@ export default {
                 Object.assign(this.orig, Object.assign(this.edit, nobody()));
             }
             catch(ex) {
-                this.$root.notify(ex.message, 'error');
+                this.notify(ex.message, 'error');
             }
         },
 
         resetPassword() {
-            if (this.$root.resetPassword(this.orig.username, !this.$root.accessible('admin'))) {
+            if (this.resetPassword(this.orig.username, !this.accessible('admin'))) {
                 //
             }
         }
@@ -253,6 +241,10 @@ export default {
 </template>
 
 <style>
+    .users-menu {
+        flex-wrap: nowrap;
+    }
+
     .user.v-list-item {
         text-align: left;
     }
