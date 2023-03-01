@@ -20,9 +20,10 @@ function somebody(opt) {
         id:0, 
         fid:0, 
         saintname: '',
-        firstname: '', 
-        middlename: '', 
         lastname: '', 
+        middlename: '', 
+        firstname: '', 
+        nickname: '', 
         birthdate: '2001-01-01', 
         baptized: false, 
         confession: false, 
@@ -105,6 +106,9 @@ function catname(student) {
         s += " "+student.middlename;
     }
     s += " "+student.firstname;
+    if (student.nickname && student.nickname != student.firstname) {
+        s += " ("+student.nickname+")";
+    }
     return s;
 }
 
@@ -135,6 +139,7 @@ function catname(student) {
                 <v-text-field hide-details label="Last Name" v-model.trim="edit.lastname"></v-text-field>
                 <v-text-field hide-details label="Middle Name" v-model.trim="edit.middlename"></v-text-field>
                 <v-text-field hide-details label="First Name" v-model.trim="edit.firstname"></v-text-field>
+                <v-text-field hide-details label="Nick Name" v-model.trim="edit.nickname"></v-text-field>
                 <v-text-field hide-details label="Birthdate" v-model.trim="edit.birthdate"></v-text-field>
                 <v-row class="pt-2">
                     <v-col class="px-2 py-0"><v-checkbox density="compact" hide-details label="Baptized" color="green"

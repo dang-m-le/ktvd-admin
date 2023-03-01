@@ -14,7 +14,7 @@ if (!$cred || !accessible($cred, 'admin')) {
 
 if ($op == "list") {
     $dbc = school_db();
-    $stm = $dbc->prepare("select * from student join schedule on student.id = schedule.id");
+    $stm = $dbc->prepare("select * from student join schedule on student.id = schedule.id order by firstname, lastname");
     $stm->execute();
     $students = array();
     while ($row = lowkey($stm->fetch(PDO::FETCH_ASSOC))) {

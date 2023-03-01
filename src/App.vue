@@ -219,7 +219,7 @@ export default {
         </v-menu>
         </v-app-bar>
 
-        <v-navigation-drawer :permanent="showing.drawer" rail expand-on-hover>
+        <v-navigation-drawer :permanent="showing.drawer" :rail="!showing.drawer" expand-on-hover>
             <v-list class="main-menu" density="compact" nav>
                 <router-link to="/settings"><v-list-item prepend-icon="mdi-chair-school" title="Registration Settings"></v-list-item></router-link>
                 <router-link to="/users"><v-list-item prepend-icon="mdi-account-cog" title="User Accounts"></v-list-item></router-link>
